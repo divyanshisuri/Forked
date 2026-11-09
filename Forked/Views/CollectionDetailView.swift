@@ -38,7 +38,7 @@ struct CollectionDetailView: View {
                 } label: {
                     Image(systemName: "plus")
                 }
-                .tint(.white)
+                .tint(Theme.red)
             }
         }
         .sheet(isPresented: $showingAddRecipes) {

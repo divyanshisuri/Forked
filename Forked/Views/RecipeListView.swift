@@ -13,7 +13,6 @@ struct RecipeListView: View {
     @State private var searchText = ""
     @State private var scope: RecipeSearchScope = .name
     @State private var selectedTags: Set<String> = []
-    @State private var showingForm = false
 
     private var allTags: [String] {
         Array(Set(recipes.flatMap(\.tags))).sorted()
@@ -35,76 +34,44 @@ struct RecipeListView: View {
         }
     }
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     var body: some View {
         NavigationStack {
-            ZStack(alignment: .bottomTrailing) {
-                ScrollView {
-                    VStack(spacing: 0) {
-                        HomeHeaderBanner()
-
-                        VStack(spacing: 16) {
-                            if !allTags.isEmpty {
-                                TagChipsView(tags: allTags, selected: $selectedTags)
-                                    .padding(.horizontal)
-                            }
-
-                            if filteredRecipes.isEmpty {
-                                ContentUnavailableView.search
-                                    .padding(.top, 60)
-                            } else {
-                                LazyVStack(spacing: 16) {
-                                    ForEach(filteredRecipes) { recipe in
-                                        NavigationLink(value: recipe) {
-                                            RecipeRowView(recipe: recipe)
-                                        }
-                                        .buttonStyle(.plain)
-                                    }
-                                }
-                                .padding(.horizontal)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    HomeHeaderBanner()
+                    if !allTags.isEmpty {
+                        TagChipsView(tags: allTags, selected: $selectedTags)
+                    }
+                    HStack {
+                        Text(searchText.isEmpty && selectedTags.isEmpty ? "All recipes" : "Results").font(.headline)
+                        Spacer()
+                        Text("\(filteredRecipes.count)")
+                            .font(.subheadline.monospacedDigit()).foregroundStyle(.secondary)
+                    }
+                    if filteredRecipes.isEmpty {
+                        ContentUnavailableView.search.frame(maxWidth: .infinity)
+                    } else {
+                        LazyVGrid(columns: dynamicTypeSize.isAccessibilitySize ? [GridItem(.flexible())] : [GridItem(.adaptive(minimum: 280), spacing: 20)], spacing: 20) {
+                            ForEach(filteredRecipes) { recipe in
+                                NavigationLink(value: recipe) { RecipeRowView(recipe: recipe) }
+                                    .buttonStyle(.plain)
                             }
                         }
-                        .padding(.vertical)
                     }
-                }
-
-                Button {
-                    showingForm = true
-                } label: {
-                    Image(systemName: "plus")
-                        .font(.system(size: 22, weight: .bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 56, height: 56)
-                        .background(Theme.red)
-                        .clipShape(Circle())
-                        .shadow(color: Theme.red.opacity(0.4), radius: 8, y: 4)
                 }
                 .padding(20)
+                .frame(maxWidth: 1200)
+                .frame(maxWidth: .infinity)
             }
             .background(Theme.background)
-            .navigationTitle("")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Recipes")
             .redNavigationBar()
-            .navigationDestination(for: Recipe.self) { recipe in
-                RecipeDetailView(recipe: recipe)
-            }
-            .searchable(text: $searchText, prompt: scope == .name ? "Search recipes" : "Search by ingredient")
+            .navigationDestination(for: Recipe.self) { recipe in RecipeDetailView(recipe: recipe) }
+            .searchable(text: $searchText, prompt: scope == .name ? "Search recipes" : "Search ingredients")
             .searchScopes($scope) {
-                ForEach(RecipeSearchScope.allCases) { scope in
-                    Text(scope.rawValue).tag(scope)
-                }
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingForm = true
-                    } label: {
-                        Image(systemName: "plus")
-                    }
-                    .tint(.white)
-                }
-            }
-            .fullScreenCover(isPresented: $showingForm) {
-                RecipeFormView(parent: nil)
+                ForEach(RecipeSearchScope.allCases) { scope in Text(scope.rawValue).tag(scope) }
             }
         }
     }

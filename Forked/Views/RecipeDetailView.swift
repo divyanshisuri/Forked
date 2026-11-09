@@ -4,6 +4,8 @@ import SwiftData
 struct RecipeDetailView: View {
     @Bindable var recipe: Recipe
     @Environment(\.modelContext) private var modelContext
+    @State private var showingEditForm = false
+    @State private var favoriteError: String?
     @State private var showingForkForm = false
     @State private var ownRatingValue: Int
 
@@ -15,14 +17,15 @@ struct RecipeDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                RecipePhotoView(photoData: recipe.photoData, imageURL: recipe.imageURL, height: 320)
+                RecipePhotoView(photoData: recipe.photoData, imageURL: recipe.imageURL, height: 300)
+                    .clipShape(RoundedRectangle(cornerRadius: 24))
+                    .padding([.horizontal, .top], 20)
 
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 28) {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
                             Text(recipe.title)
                                 .font(.largeTitle.weight(.bold))
-                                .fontDesign(.rounded)
                                 .foregroundStyle(Theme.text)
                             if recipe.parent != nil {
                                 Image(systemName: "arrow.triangle.branch")
@@ -59,8 +62,8 @@ struct RecipeDetailView: View {
                                             .font(.caption.weight(.bold))
                                             .padding(.horizontal, 10)
                                             .padding(.vertical, 4)
-                                            .background(Theme.red)
-                                            .foregroundStyle(.white)
+                                            .background(Theme.surface)
+                                            .foregroundStyle(Theme.secondaryText)
                                             .clipShape(Capsule())
                                     }
                                 }
@@ -68,10 +71,18 @@ struct RecipeDetailView: View {
                         }
                     }
 
+                    if let minutes = recipe.cookTimeMinutes {
+                        Label(CookTime.label(minutes), systemImage: "clock")
+                    }
+                    if let parent = recipe.parent {
+                        RecipeDiffView(diff: RecipeDiff(original: RecipeContent(recipe: parent), variation: RecipeContent(recipe: recipe)))
+                    }
+
+
                     RedDivider()
 
                     VStack(alignment: .leading, spacing: 8) {
-                        SectionHeader("Your Rating")
+                        Text("Your rating").font(.subheadline).foregroundStyle(.secondary)
                         StarRatingPicker(rating: $ownRatingValue)
                             .onChange(of: ownRatingValue) { _, newValue in
                                 updateOwnRating(newValue)
@@ -90,10 +101,8 @@ struct RecipeDetailView: View {
 
                     VStack(alignment: .leading, spacing: 10) {
                         SectionHeader("Ingredients")
-                        ForEach(recipe.ingredients, id: \.self) { ingredient in
-                            Text("•  \(ingredient)")
-                                .foregroundStyle(Theme.text)
-                        }
+                        Text(recipe.ingredients.map { "•  " + $0 }.joined(separator: "\n\n"))
+                            .foregroundStyle(Theme.text)
                     }
 
                     RedDivider()
@@ -101,8 +110,15 @@ struct RecipeDetailView: View {
                     VStack(alignment: .leading, spacing: 10) {
                         SectionHeader("Steps")
                         ForEach(Array(recipe.steps.enumerated()), id: \.offset) { index, step in
-                            Text("\(index + 1).  \(step)")
-                                .foregroundStyle(Theme.text)
+                            HStack(alignment: .top, spacing: 14) {
+                                Text("\(index + 1)")
+                                    .font(.subheadline.weight(.semibold).monospacedDigit())
+                                    .foregroundStyle(Theme.red)
+                                    .frame(width: 30, height: 30)
+                                    .background(Theme.red.opacity(0.1), in: Circle())
+                                Text(step).frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .padding(.vertical, 6)
                         }
                     }
 
@@ -113,21 +129,57 @@ struct RecipeDetailView: View {
                             SectionHeader("Variations")
                             ForEach(recipe.variations) { variation in
                                 NavigationLink(value: variation) {
-                                    RecipeRowView(recipe: variation)
+                                    VStack(alignment: .leading) {
+                                        RecipeRowView(recipe: variation)
+                                        Text(RecipeDiff(original: RecipeContent(recipe: recipe), variation: RecipeContent(recipe: variation)).summary)
+                                            .font(.caption)
+                                            .foregroundStyle(Theme.secondaryText)
+                                    }
                                 }
                                 .buttonStyle(.plain)
                             }
                         }
                     }
                 }
-                .padding()
+                .padding(24)
             }
+            .frame(maxWidth: 760)
+            .frame(maxWidth: .infinity)
         }
         .background(Theme.background)
-        .navigationTitle(recipe.title)
+        .navigationTitle("Recipe")
         .navigationBarTitleDisplayMode(.inline)
         .redNavigationBar()
-        .fullScreenCover(isPresented: $showingForkForm) {
+        .toolbar {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button {
+                    recipe.isFavorite.toggle()
+                    do { try modelContext.save() } catch {
+                        modelContext.rollback()
+                        favoriteError = error.localizedDescription
+                    }
+                } label: {
+                    Image(systemName: recipe.isFavorite ? "heart.fill" : "heart")
+                }
+                .accessibilityLabel(recipe.isFavorite ? "Remove from Favorites" : "Add to Favorites")
+                NavigationLink {
+                    RecipeHistoryView(recipe: recipe)
+                } label: {
+                    Image(systemName: "clock.arrow.circlepath")
+                }
+                .accessibilityLabel("Version history")
+                if recipe.isUserCreated {
+                    Button("Edit") { showingEditForm = true }
+                }
+            }
+        }
+        .alert("Could not save favorite", isPresented: Binding(get: { favoriteError != nil }, set: { if !$0 { favoriteError = nil } })) {
+            Button("OK") { favoriteError = nil }
+        } message: { Text(favoriteError ?? "") }
+        .sheet(isPresented: $showingEditForm) {
+            RecipeFormView(editingRecipe: recipe)
+        }
+        .sheet(isPresented: $showingForkForm) {
             RecipeFormView(parent: recipe)
         }
     }

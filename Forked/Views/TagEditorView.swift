@@ -18,11 +18,12 @@ struct TagEditorView: View {
                                     Image(systemName: "xmark.circle.fill")
                                 }
                             }
-                            .font(.subheadline.weight(.semibold))
+                            .buttonStyle(.borderless)
+                            .font(.subheadline.weight(.medium))
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
-                            .background(Theme.red)
-                            .foregroundStyle(Color.white)
+                            .background(Theme.red.opacity(0.1))
+                            .foregroundStyle(Theme.red)
                             .clipShape(Capsule())
                         }
                     }
@@ -33,6 +34,7 @@ struct TagEditorView: View {
                 TextField("Add a tag", text: $newTag)
                     .onSubmit(addTag)
                 Button("Add", action: addTag)
+                    .buttonStyle(.borderless)
                     .foregroundStyle(Theme.red)
                     .disabled(newTag.trimmingCharacters(in: .whitespaces).isEmpty)
             }

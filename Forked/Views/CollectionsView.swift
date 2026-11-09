@@ -9,32 +9,28 @@ struct CollectionsView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if collections.isEmpty {
-                    ContentUnavailableView(
-                        "No Collections",
-                        systemImage: "folder",
-                        description: Text("Create a collection to save your favorite recipes.")
-                    )
-                } else {
-                    List {
-                        ForEach(collections) { collection in
-                            NavigationLink(value: collection) {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(collection.name)
-                                        .font(.headline)
-                                        .foregroundStyle(Theme.text)
-                                    Text("\(collection.recipes.count) recipe\(collection.recipes.count == 1 ? "" : "s")")
-                                        .font(.caption)
-                                        .foregroundStyle(Theme.secondaryText)
-                                }
-                            }
-                        }
-                        .onDelete(perform: deleteCollections)
-                    }
-                    .listStyle(.plain)
+            List {
+                NavigationLink {
+                    FavoritesView()
+                } label: {
+                    Label("Favorites", systemImage: "heart.fill").foregroundStyle(Theme.red)
                 }
+                ForEach(collections) { collection in
+                    NavigationLink(value: collection) {
+                        HStack(spacing: 14) {
+                            Image(systemName: "folder").font(.title2).foregroundStyle(Theme.red)
+                            VStack(alignment: .leading, spacing: 4) {
+                            Text(collection.name).font(.headline)
+                            Text("\(collection.recipes.count) recipes").font(.caption).foregroundStyle(.secondary)
+                            }
+                            .padding(.vertical, 8)
+                        }
+                    }
+                }
+                .onDelete(perform: deleteCollections)
             }
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
             .background(Theme.background)
             .navigationTitle("Collections")
             .redNavigationBar()
@@ -51,7 +47,7 @@ struct CollectionsView: View {
                     } label: {
                         Image(systemName: "plus")
                     }
-                    .tint(.white)
+                    .tint(Theme.red)
                 }
             }
             .alert("New Collection", isPresented: $showingNewCollection) {

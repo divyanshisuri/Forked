@@ -1,55 +1,59 @@
 import SwiftUI
 
 struct RootView: View {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var selectedTab = 0
     @State private var showingNewPost = false
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            TabView(selection: $selectedTab) {
-                RecipeListView()
-                    .tabItem {
-                        Label("Recipes", systemImage: "fork.knife")
+        Group {
+            if horizontalSizeClass == .regular {
+                NavigationSplitView {
+                    List {
+                        Section("Library") {
+                            Button { selectedTab = 0 } label: {
+                                Label("Recipes", systemImage: "fork.knife")
+                                    .foregroundStyle(selectedTab == 0 ? Theme.red : Theme.text)
+                            }
+                            Button { selectedTab = 2 } label: {
+                                Label("Collections", systemImage: "square.stack")
+                                    .foregroundStyle(selectedTab == 2 ? Theme.red : Theme.text)
+                            }
+                        }
                     }
-                    .tag(0)
-
-                Color.clear
-                    .tabItem {
-                        Text("")
+                    .navigationTitle("Forked")
+                    .safeAreaInset(edge: .bottom) {
+                        Button { showingNewPost = true } label: {
+                            Label("New Recipe", systemImage: "plus")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.red)
+                        .keyboardShortcut("n", modifiers: .command)
+                        .padding()
                     }
-                    .tag(1)
-
-                CollectionsView()
-                    .tabItem {
-                        Label("Collections", systemImage: "folder.fill")
+                    .navigationSplitViewColumnWidth(min: 200, ideal: 230, max: 280)
+                } detail: {
+                    if selectedTab == 2 { CollectionsView() }
+                    else { RecipeListView() }
+                }
+            } else {
+                TabView(selection: $selectedTab) {
+                    RecipeListView()
+                        .tabItem { Label("Recipes", systemImage: "fork.knife") }.tag(0)
+                    Color.clear
+                        .tabItem { Label("New Recipe", systemImage: "plus.circle") }.tag(1)
+                    CollectionsView()
+                        .tabItem { Label("Collections", systemImage: "square.stack") }.tag(2)
+                }
+                .onChange(of: selectedTab) { oldValue, newValue in
+                    if newValue == 1 {
+                        showingNewPost = true
+                        selectedTab = oldValue
                     }
-                    .tag(2)
-            }
-            .tint(Theme.red)
-            .fontDesign(.rounded)
-            .onChange(of: selectedTab) { oldValue, newValue in
-                if newValue == 1 {
-                    showingNewPost = true
-                    selectedTab = oldValue
                 }
             }
-
-            Button {
-                showingNewPost = true
-            } label: {
-                Image(systemName: "plus")
-                    .font(.system(size: 26, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(width: 58, height: 58)
-                    .background(Theme.red)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.white, lineWidth: 3))
-                    .shadow(color: Theme.red.opacity(0.5), radius: 8, y: 4)
-            }
-            .padding(.bottom, 2)
         }
-        .fullScreenCover(isPresented: $showingNewPost) {
-            RecipeFormView(parent: nil)
-        }
+        .tint(Theme.red)
+        .sheet(isPresented: $showingNewPost) { RecipeFormView() }
     }
 }

@@ -1,22 +1,16 @@
 import SwiftUI
 
 struct RecipePhotoPlaceholder: View {
-    var showsProgress: Bool = false
-
+    var showsProgress = false
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [Theme.red, Theme.red.opacity(0.65)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            Theme.surface
             if showsProgress {
-                ProgressView()
-                    .tint(.white)
+                ProgressView().tint(Theme.secondaryText)
             } else {
                 Image(systemName: "fork.knife")
-                    .font(.largeTitle)
-                    .foregroundStyle(.white.opacity(0.85))
+                    .font(.largeTitle.weight(.light))
+                    .foregroundStyle(Theme.secondaryText.opacity(0.5))
             }
         }
     }

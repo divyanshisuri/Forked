@@ -2,16 +2,15 @@ import SwiftUI
 
 struct HomeHeaderBanner: View {
     var body: some View {
-        VStack(spacing: 4) {
-            Text("Forked")
-                .font(.system(size: 34, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
-            Text("Fork it. Make it yours.")
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(.white.opacity(0.9))
+        VStack(alignment: .leading, spacing: 8) {
+            Text("A little inspiration.")
+                .font(.title2.weight(.semibold))
+                .foregroundStyle(Theme.text)
+            Text("Find something you love. Make it your own.")
+                .font(.subheadline)
+                .foregroundStyle(Theme.secondaryText)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 20)
-        .background(Theme.red)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 8)
     }
 }

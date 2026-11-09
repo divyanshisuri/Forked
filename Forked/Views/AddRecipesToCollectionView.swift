@@ -30,7 +30,7 @@ struct AddRecipesToCollectionView: View {
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
-                        .tint(.white)
+                        .tint(Theme.red)
                 }
             }
         }

@@ -9,6 +9,14 @@ final class Recipe {
     var tags: [String]
     @Attribute(.externalStorage) var photoData: Data?
     var imageURL: String?
+    var cookTimeMinutes: Int?
+    var isUserCreated: Bool = false
+    var ownershipAssigned: Bool = false
+    var isFavorite: Bool = false
+
+    @Relationship(deleteRule: .cascade, inverse: \RecipeVersion.recipe)
+    var versions: [RecipeVersion] = []
+
     var createdAt: Date
 
     var parent: Recipe?
@@ -31,6 +39,7 @@ final class Recipe {
         createdAt: Date = .now,
         parent: Recipe? = nil
     ) {
+        self.ownershipAssigned = true
         self.title = title
         self.ingredients = ingredients
         self.steps = steps

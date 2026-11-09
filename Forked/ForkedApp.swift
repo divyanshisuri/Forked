@@ -6,7 +6,7 @@ struct ForkedApp: App {
     let container: ModelContainer
 
     init() {
-        let schema = Schema([Recipe.self, Rating.self, RecipeCollection.self])
+        let schema = Schema([Recipe.self, Rating.self, RecipeCollection.self, RecipeVersion.self])
         let configuration = ModelConfiguration(schema: schema)
         do {
             container = try ModelContainer(for: schema, configurations: [configuration])

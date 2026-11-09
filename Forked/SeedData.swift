@@ -4,7 +4,26 @@ import SwiftData
 enum SeedData {
     static func seedIfNeeded(context: ModelContext) {
         let existing = try? context.fetchCount(FetchDescriptor<Recipe>())
-        guard existing == 0 else { return }
+        guard existing == 0 else {
+            // Before ownership existed, only these bundled recipes were not user-created.
+            let seedTimes = [
+                "Classic Margherita Pizza": 10, "Spicy Diavola Pizza": 10,
+                "Vegan Lentil Shepherd's Pie": 50, "Classic Beef Tacos": 20,
+                "Chocolate Chip Cookies": 12, "Classic Caesar Salad": 10,
+                "Creamy Garlic Alfredo Pasta": 25, "Fluffy Buttermilk Pancakes": 20
+            ]
+            if let recipes = try? context.fetch(FetchDescriptor<Recipe>()) {
+                for recipe in recipes where !recipe.ownershipAssigned {
+                    let isSeed = seedTimes[recipe.title] != nil &&
+                        recipe.imageURL?.hasPrefix("https://images.unsplash.com/") == true &&
+                        recipe.photoData == nil
+                    recipe.isUserCreated = !isSeed
+                    recipe.ownershipAssigned = true
+                    if isSeed { recipe.cookTimeMinutes = seedTimes[recipe.title] }
+                }
+            }
+            return
+        }
 
         let margherita = Recipe(
             title: "Classic Margherita Pizza",
@@ -117,7 +136,9 @@ enum SeedData {
         )
 
         let recipes = [margherita, diavola, lentilPie, tacos, cookies, salad, alfredo, pancakes]
-        for recipe in recipes {
+        let cookTimes = [10, 10, 50, 20, 12, 10, 25, 20]
+        for (recipe, minutes) in zip(recipes, cookTimes) {
+            recipe.cookTimeMinutes = minutes
             context.insert(recipe)
         }
 
