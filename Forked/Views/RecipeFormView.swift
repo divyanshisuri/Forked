@@ -91,6 +91,8 @@ struct RecipeFormView: View {
                 Section("Tags") { TagEditorView(tags: $draft.tags) }
             }
             .formStyle(.grouped)
+            .scrollContentBackground(.hidden)
+            .background(Theme.background)
             .navigationTitle(editingRecipe != nil ? "Edit Recipe" : (parent == nil ? "New Recipe" : "Fork Recipe"))
             .navigationBarTitleDisplayMode(.inline)
             .tint(Theme.red)

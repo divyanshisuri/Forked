@@ -18,19 +18,20 @@ struct RecipeDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 RecipePhotoView(photoData: recipe.photoData, imageURL: recipe.imageURL, height: 300)
-                    .clipShape(RoundedRectangle(cornerRadius: 24))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
                     .padding([.horizontal, .top], 20)
 
                 VStack(alignment: .leading, spacing: 28) {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
                             Text(recipe.title)
-                                .font(.largeTitle.weight(.bold))
+                                .font(.largeTitle.weight(.regular))
+                                .fontDesign(.serif)
                                 .foregroundStyle(Theme.text)
                             if recipe.parent != nil {
                                 Image(systemName: "arrow.triangle.branch")
                                     .font(.caption.weight(.bold))
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(Theme.onAccent)
                                     .padding(6)
                                     .background(Theme.red)
                                     .clipShape(Circle())

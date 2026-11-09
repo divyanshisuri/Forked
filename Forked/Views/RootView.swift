@@ -5,6 +5,19 @@ struct RootView: View {
     @State private var selectedTab = 0
     @State private var showingNewPost = false
 
+    // Present the action tab without changing selection and then reverting it.
+    private var tabSelection: Binding<Int> {
+        Binding {
+            selectedTab
+        } set: { newValue in
+            if newValue == 1 {
+                showingNewPost = true
+            } else {
+                selectedTab = newValue
+            }
+        }
+    }
+
     var body: some View {
         Group {
             if horizontalSizeClass == .regular {
@@ -13,14 +26,20 @@ struct RootView: View {
                         Section("Library") {
                             Button { selectedTab = 0 } label: {
                                 Label("Recipes", systemImage: "fork.knife")
-                                    .foregroundStyle(selectedTab == 0 ? Theme.red : Theme.text)
+                                    .foregroundStyle(Theme.text)
+                                    .fontWeight(selectedTab == 0 ? .semibold : .regular)
                             }
+                            .listRowBackground(selectedTab == 0 ? Theme.surface : Theme.background)
                             Button { selectedTab = 2 } label: {
                                 Label("Collections", systemImage: "square.stack")
-                                    .foregroundStyle(selectedTab == 2 ? Theme.red : Theme.text)
+                                    .foregroundStyle(Theme.text)
+                                    .fontWeight(selectedTab == 2 ? .semibold : .regular)
                             }
+                            .listRowBackground(selectedTab == 2 ? Theme.surface : Theme.background)
                         }
                     }
+                    .scrollContentBackground(.hidden)
+                    .background(Theme.background)
                     .navigationTitle("Forked")
                     .safeAreaInset(edge: .bottom) {
                         Button { showingNewPost = true } label: {
@@ -37,19 +56,13 @@ struct RootView: View {
                     else { RecipeListView() }
                 }
             } else {
-                TabView(selection: $selectedTab) {
+                TabView(selection: tabSelection) {
                     RecipeListView()
                         .tabItem { Label("Recipes", systemImage: "fork.knife") }.tag(0)
                     Color.clear
                         .tabItem { Label("New Recipe", systemImage: "plus.circle") }.tag(1)
                     CollectionsView()
                         .tabItem { Label("Collections", systemImage: "square.stack") }.tag(2)
-                }
-                .onChange(of: selectedTab) { oldValue, newValue in
-                    if newValue == 1 {
-                        showingNewPost = true
-                        selectedTab = oldValue
-                    }
                 }
             }
         }

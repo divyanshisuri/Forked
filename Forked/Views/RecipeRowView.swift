@@ -5,21 +5,23 @@ struct RecipeRowView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            RecipePhotoView(photoData: recipe.photoData, imageURL: recipe.imageURL, height: 200)
+            RecipePhotoView(photoData: recipe.photoData, imageURL: recipe.imageURL, height: 220)
+                .clipShape(RoundedRectangle(cornerRadius: Theme.cardCorner))
                 .overlay(alignment: .topTrailing) {
                     if recipe.isFavorite {
                         Image(systemName: "heart.fill")
                             .font(.subheadline)
                             .foregroundStyle(Theme.red)
                             .padding(10)
-                            .background(.regularMaterial, in: Circle())
+                            .background(Theme.cardBackground, in: Circle())
                             .padding(12)
                             .accessibilityLabel("Favorite")
                     }
                 }
             VStack(alignment: .leading, spacing: 12) {
                 Text(recipe.title)
-                    .font(.headline)
+                    .font(.title3.weight(.medium))
+                    .fontDesign(.serif)
                     .foregroundStyle(Theme.text)
                     .multilineTextAlignment(.leading)
                     .lineLimit(2, reservesSpace: true)
@@ -44,14 +46,11 @@ struct RecipeRowView: View {
                         .lineLimit(1)
                 }
             }
-            .padding(16)
+            .padding(.top, 16)
+            .padding(.horizontal, 2)
+            .padding(.bottom, 8)
         }
         .background(Theme.cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.cardCorner))
-        .overlay {
-            RoundedRectangle(cornerRadius: Theme.cardCorner)
-                .strokeBorder(.primary.opacity(0.05), lineWidth: 1)
-        }
         .contentShape(RoundedRectangle(cornerRadius: Theme.cardCorner))
     }
 }

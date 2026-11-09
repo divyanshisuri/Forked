@@ -39,13 +39,16 @@ struct RecipeListView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 28) {
                     HomeHeaderBanner()
                     if !allTags.isEmpty {
                         TagChipsView(tags: allTags, selected: $selectedTags)
                     }
                     HStack {
-                        Text(searchText.isEmpty && selectedTags.isEmpty ? "All recipes" : "Results").font(.headline)
+                        Text(searchText.isEmpty && selectedTags.isEmpty ? "THE COLLECTION" : "RESULTS")
+                            .font(.caption.weight(.semibold))
+                            .tracking(1.8)
+                            .foregroundStyle(.secondary)
                         Spacer()
                         Text("\(filteredRecipes.count)")
                             .font(.subheadline.monospacedDigit()).foregroundStyle(.secondary)
@@ -53,7 +56,7 @@ struct RecipeListView: View {
                     if filteredRecipes.isEmpty {
                         ContentUnavailableView.search.frame(maxWidth: .infinity)
                     } else {
-                        LazyVGrid(columns: dynamicTypeSize.isAccessibilitySize ? [GridItem(.flexible())] : [GridItem(.adaptive(minimum: 280), spacing: 20)], spacing: 20) {
+                        LazyVGrid(columns: dynamicTypeSize.isAccessibilitySize ? [GridItem(.flexible())] : [GridItem(.adaptive(minimum: 260), spacing: 28)], spacing: 20) {
                             ForEach(filteredRecipes) { recipe in
                                 NavigationLink(value: recipe) { RecipeRowView(recipe: recipe) }
                                     .buttonStyle(.plain)
@@ -61,12 +64,14 @@ struct RecipeListView: View {
                         }
                     }
                 }
-                .padding(20)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 32)
                 .frame(maxWidth: 1200)
                 .frame(maxWidth: .infinity)
             }
             .background(Theme.background)
-            .navigationTitle("Recipes")
+            .navigationTitle("Forked")
+            .navigationBarTitleDisplayMode(.inline)
             .redNavigationBar()
             .navigationDestination(for: Recipe.self) { recipe in RecipeDetailView(recipe: recipe) }
             .searchable(text: $searchText, prompt: scope == .name ? "Search recipes" : "Search ingredients")

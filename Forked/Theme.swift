@@ -2,14 +2,16 @@ import SwiftUI
 import UIKit
 
 enum Theme {
-    static let red = Color(light: Color(red: 0.65, green: 0.24, blue: 0.18),
-                           dark: Color(red: 0.94, green: 0.52, blue: 0.40))
-    static let background = Color(uiColor: .systemGroupedBackground)
-    static let cardBackground = Color(uiColor: .secondarySystemGroupedBackground)
-    static let surface = Color(uiColor: .tertiarySystemFill)
+    // A monochrome accent keeps the interface quiet and lets food photography lead.
+    static let red = Color(uiColor: .label)
+    static let background = Color(uiColor: .systemBackground)
+    static let cardBackground = Color(uiColor: .systemBackground)
+    static let surface = Color(light: Color(white: 0.965), dark: Color(white: 0.13))
+    static let separator = Color.primary.opacity(0.09)
+    static let onAccent = Color(uiColor: .systemBackground)
     static let text = Color.primary
     static let secondaryText = Color.secondary
-    static let cardCorner: CGFloat = 20
+    static let cardCorner: CGFloat = 14
 }
 extension Color {
     init(light: Color, dark: Color) {
@@ -26,10 +28,10 @@ struct RedButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.subheadline.weight(.semibold))
-            .foregroundStyle(.white)
+            .foregroundStyle(Theme.onAccent)
             .padding(.horizontal, 20)
             .padding(.vertical, 14)
-            .background(Theme.red, in: RoundedRectangle(cornerRadius: 14))
+            .background(Theme.red, in: RoundedRectangle(cornerRadius: 12))
             .opacity(isEnabled ? (configuration.isPressed ? 0.75 : 1) : 0.4)
     }
 }

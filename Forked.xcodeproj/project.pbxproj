@@ -35,16 +35,6 @@
 			path = Forked;
 			sourceTree = "<group>";
 		};
-		FBE0B50B308EF69B0057FE29 /* ForkedTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = ForkedTests;
-			sourceTree = "<group>";
-		};
-		FBE0B515308EF69B0057FE29 /* ForkedUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = ForkedUITests;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,8 +66,6 @@
 			isa = PBXGroup;
 			children = (
 				FBE0B4FD308EF6990057FE29 /* Forked */,
-				FBE0B50B308EF69B0057FE29 /* ForkedTests */,
-				FBE0B515308EF69B0057FE29 /* ForkedUITests */,
 				FBE0B4FC308EF6990057FE29 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -130,9 +118,6 @@
 			dependencies = (
 				FBE0B50A308EF69B0057FE29 /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				FBE0B50B308EF69B0057FE29 /* ForkedTests */,
-			);
 			name = ForkedTests;
 			packageProductDependencies = (
 			);
@@ -152,9 +137,6 @@
 			);
 			dependencies = (
 				FBE0B514308EF69B0057FE29 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				FBE0B515308EF69B0057FE29 /* ForkedUITests */,
 			);
 			name = ForkedUITests;
 			packageProductDependencies = (

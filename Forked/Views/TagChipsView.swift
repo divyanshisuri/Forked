@@ -19,8 +19,9 @@ struct TagChipsView: View {
                         .font(.subheadline.weight(.medium))
                         .padding(.horizontal, 14)
                         .padding(.vertical, 10)
-                        .background(isSelected ? Theme.red.opacity(0.12) : Theme.cardBackground, in: Capsule())
-                        .foregroundStyle(isSelected ? Theme.red : Theme.text)
+                        .background(isSelected ? Theme.red : Theme.cardBackground, in: Capsule())
+                        .foregroundStyle(isSelected ? Theme.onAccent : Theme.secondaryText)
+                        .overlay(Capsule().strokeBorder(isSelected ? Color.clear : Theme.separator, lineWidth: 1))
                     }
                     .buttonStyle(.plain)
                     .accessibilityAddTraits(isSelected ? .isSelected : [])
