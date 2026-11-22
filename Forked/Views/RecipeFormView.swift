@@ -59,6 +59,7 @@ struct RecipeFormView: View {
                             TextField("Ingredient and quantity", text: rowBinding(row.id, in: \.ingredients), axis: .vertical)
                             if draft.ingredients.count > 1 {
                                 Button(role: .destructive) {
+                                    guard draft.ingredients.count > 1 else { return }
                                     draft.ingredients.removeAll { $0.id == row.id }
                                 } label: { Image(systemName: "minus.circle") }
                                 .buttonStyle(.borderless)
@@ -77,6 +78,7 @@ struct RecipeFormView: View {
                             TextField("Describe this step", text: rowBinding(row.id, in: \.steps), axis: .vertical)
                             if draft.steps.count > 1 {
                                 Button(role: .destructive) {
+                                    guard draft.steps.count > 1 else { return }
                                     draft.steps.removeAll { $0.id == row.id }
                                 } label: { Image(systemName: "minus.circle") }
                                 .buttonStyle(.borderless)
