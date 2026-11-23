@@ -1,3 +1,6 @@
+// RecipeDiff.swift
+// Compares two versions of a recipe field by field to show what a fork or edit changed.
+
 import Foundation
 struct RecipeDiff {
     struct Change: Identifiable {

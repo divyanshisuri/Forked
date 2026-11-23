@@ -57,11 +57,11 @@ struct AuthView: View {
 
                 Section {
                     TextField("Username", text: $credentials.username)
-                        .textContentType(.username)
+                        .textContentType(AppEnvironment.isUITesting ? nil : .username)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                     SecureField("Password", text: $credentials.password)
-                        .textContentType(mode == .signUp ? .newPassword : .password)
+                        .textContentType(AppEnvironment.isUITesting ? nil : (mode == .signUp ? .newPassword : .password))
                     if mode == .signUp {
                         SecureField("Confirm password", text: $credentials.confirmPassword)
                             .textContentType(.newPassword)
@@ -93,6 +93,7 @@ struct AuthView: View {
                     }
                     .buttonStyle(.red)
                     .disabled(!canSubmit || isWorking)
+                    .accessibilityIdentifier("authSubmit")
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
                 }

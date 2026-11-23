@@ -1,3 +1,6 @@
+// RecipeListView.swift
+// The home feed: search by name or ingredient, filter by tag, sort, and browse every recipe.
+
 import SwiftUI
 import SwiftData
 
@@ -13,12 +16,20 @@ struct RecipeListView: View {
     @State private var searchText = ""
     @State private var scope: RecipeSearchScope = .name
     @State private var selectedTags: Set<String> = []
+    @AppStorage(RecipeSort.storageKey) private var sort: RecipeSort = .newest
+    @Environment(\.isChef) private var isChef
+    @State private var showingInsights = false
 
     private var allTags: [String] {
         Array(Set(recipes.flatMap(\.tags))).sorted()
     }
 
     private var filteredRecipes: [Recipe] {
+        sort.apply(to: matchingRecipes)
+    }
+
+    // PARADIGM: Functional. filter with a closure keeps recipes that match the search and every selected tag.
+    private var matchingRecipes: [Recipe] {
         recipes.filter { recipe in
             let matchesSearch: Bool
             if searchText.isEmpty {
@@ -49,9 +60,10 @@ struct RecipeListView: View {
                             .font(.caption.weight(.semibold))
                             .tracking(1.8)
                             .foregroundStyle(.secondary)
-                        Spacer()
                         Text("\(filteredRecipes.count)")
                             .font(.subheadline.monospacedDigit()).foregroundStyle(.secondary)
+                        Spacer()
+                        RecipeSortMenu(selection: $sort)
                     }
                     if filteredRecipes.isEmpty {
                         ContentUnavailableView.search.frame(maxWidth: .infinity)
@@ -60,6 +72,7 @@ struct RecipeListView: View {
                             ForEach(filteredRecipes) { recipe in
                                 NavigationLink(value: recipe) { RecipeRowView(recipe: recipe) }
                                     .buttonStyle(.plain)
+                                    .recipeActions(recipe)
                             }
                         }
                     }
@@ -74,6 +87,16 @@ struct RecipeListView: View {
             .navigationBarTitleDisplayMode(.inline)
             .redNavigationBar()
             .navigationDestination(for: Recipe.self) { recipe in RecipeDetailView(recipe: recipe) }
+            .toolbar {
+                if isChef {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button { showingInsights = true } label: { Image(systemName: "chart.bar.xaxis") }
+                            .accessibilityLabel("Kitchen Insights")
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) { ShoppingListButton() }
+            }
+            .sheet(isPresented: $showingInsights) { InsightsView() }
             .searchable(text: $searchText, prompt: scope == .name ? "Search recipes" : "Search ingredients")
             .searchScopes($scope) {
                 ForEach(RecipeSearchScope.allCases) { scope in Text(scope.rawValue).tag(scope) }

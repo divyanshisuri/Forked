@@ -1,3 +1,6 @@
+// CookTime.swift
+// Parses, validates and formats a recipe's cook time in minutes.
+
 import Foundation
 nonisolated enum CookTime {
     static func minutes(from text: String) -> Int? {

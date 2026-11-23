@@ -1,3 +1,6 @@
+// RecipeDraft.swift
+// Editable form state for creating, forking or editing a recipe, with validation and saving.
+
 import Foundation
 import SwiftData
 
@@ -13,6 +16,8 @@ struct RecipeDraft {
     var photoData: Data?
     var imageURL: String?
     var cookTime = ""
+    var servings = ""
+    var forkNote = ""
 
     init(recipe: Recipe? = nil, isFork: Bool = false) {
         guard let recipe else { return }
@@ -23,10 +28,12 @@ struct RecipeDraft {
         photoData = recipe.photoData
         imageURL = recipe.imageURL
         cookTime = recipe.cookTimeMinutes.map(String.init) ?? ""
+        servings = recipe.servings.map(String.init) ?? ""
+        forkNote = isFork ? "" : recipe.forkNote ?? ""
     }
     var isValid: Bool {
         !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        CookTime.isValid(cookTime) &&
+        CookTime.isValid(cookTime) && Servings.isValid(servings) &&
         !cleaned(ingredients).isEmpty && !cleaned(steps).isEmpty
     }
     private func cleaned(_ rows: [Row]) -> [String] {
@@ -47,7 +54,11 @@ struct RecipeDraft {
         recipe.photoData = photoData
         recipe.imageURL = imageURL
         recipe.cookTimeMinutes = CookTime.minutes(from: cookTime)
+        recipe.servings = Servings.count(from: servings)
+        let note = forkNote.trimmingCharacters(in: .whitespacesAndNewlines)
+        recipe.forkNote = recipe.parent == nil || note.isEmpty ? nil : note
     }
+    /// Applies the draft and records the previous content as a version when anything changed.
     @discardableResult
     func save(to recipe: Recipe, context: ModelContext) throws -> Bool {
         guard isValid, recipe.isUserCreated else { return false }

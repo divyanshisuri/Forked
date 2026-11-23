@@ -1,3 +1,6 @@
+// TagEditorView.swift
+// Adds and removes tags on a recipe in the form.
+
 import SwiftUI
 
 struct TagEditorView: View {

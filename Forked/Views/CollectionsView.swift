@@ -1,3 +1,6 @@
+// CollectionsView.swift
+// Favorites, the Shopping List and named recipe collections.
+
 import SwiftUI
 import SwiftData
 
@@ -14,6 +17,11 @@ struct CollectionsView: View {
                     FavoritesView()
                 } label: {
                     Label("Favorites", systemImage: "heart.fill").foregroundStyle(Theme.red)
+                }
+                NavigationLink {
+                    ShoppingListView()
+                } label: {
+                    Label("Shopping List", systemImage: "cart.fill").foregroundStyle(Theme.red)
                 }
                 ForEach(collections) { collection in
                     NavigationLink(value: collection) {
@@ -62,12 +70,13 @@ struct CollectionsView: View {
         let trimmed = newCollectionName.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return }
         modelContext.insert(RecipeCollection(name: trimmed))
+        try? modelContext.save()
         newCollectionName = ""
     }
 
     private func deleteCollections(at offsets: IndexSet) {
-        for index in offsets {
-            modelContext.delete(collections[index])
-        }
+        let targets = offsets.map { collections[$0] }
+        targets.forEach(modelContext.delete)
+        try? modelContext.save()
     }
 }

@@ -1,3 +1,6 @@
+// RecipeCollection.swift
+// A named group of saved recipes.
+
 import Foundation
 import SwiftData
 

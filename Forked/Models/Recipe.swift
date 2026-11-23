@@ -1,6 +1,10 @@
+// Recipe.swift
+// The core recipe model. A recipe can be forked into variations that keep a link to their parent.
+
 import Foundation
 import SwiftData
 
+// PARADIGM: Object-oriented. A model class with relationships to its author, parent, variations and ratings.
 @Model
 final class Recipe {
     var title: String
@@ -10,6 +14,8 @@ final class Recipe {
     @Attribute(.externalStorage) var photoData: Data?
     var imageURL: String?
     var cookTimeMinutes: Int?
+    var servings: Int?
+    var forkNote: String?
     var isUserCreated: Bool = false
     var ownershipAssigned: Bool = false
     var isFavorite: Bool = false
@@ -55,6 +61,7 @@ final class Recipe {
 }
 
 extension Recipe {
+    // PARADIGM: Functional. reduce folds every rating into a single total.
     var averageRating: Double? {
         guard !ratings.isEmpty else { return nil }
         let total = ratings.reduce(0) { $0 + $1.stars }

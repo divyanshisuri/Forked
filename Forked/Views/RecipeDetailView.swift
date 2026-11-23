@@ -10,10 +10,19 @@ struct RecipeDetailView: View {
     @State private var favoriteError: String?
     @State private var showingForkForm = false
     @State private var ownRatingValue: Int
+    @State private var cooking = false
+    @State private var servingsSelection: Int
+    @State private var addedToList = false
+    @State private var listError: String?
 
     init(recipe: Recipe) {
         self.recipe = recipe
         _ownRatingValue = State(initialValue: recipe.ownRating?.stars ?? 0)
+        _servingsSelection = State(initialValue: recipe.servings ?? 1)
+    }
+
+    private var scaleFactor: Double {
+        Double(servingsSelection) / Double(recipe.servings ?? 1)
     }
 
     var body: some View {
@@ -48,6 +57,10 @@ struct RecipeDetailView: View {
                             }
                         }
 
+                        if let note = recipe.forkNote {
+                            ForkNoteView(note: note)
+                        }
+
                         if let average = recipe.averageRating {
                             HStack(spacing: 6) {
                                 StarRatingView(rating: Int(average.rounded()))
@@ -74,8 +87,15 @@ struct RecipeDetailView: View {
                         }
                     }
 
-                    if let minutes = recipe.cookTimeMinutes {
-                        Label(CookTime.label(minutes), systemImage: "clock")
+                    if recipe.cookTimeMinutes != nil || recipe.servings != nil {
+                        HStack(spacing: 20) {
+                            if let minutes = recipe.cookTimeMinutes {
+                                Label(CookTime.label(minutes), systemImage: "clock")
+                            }
+                            if let servings = recipe.servings {
+                                Label(Servings.label(servings), systemImage: "person.2")
+                            }
+                        }
                     }
                     if let parent = recipe.parent {
                         RecipeDiffView(diff: RecipeDiff(original: RecipeContent(recipe: parent), variation: RecipeContent(recipe: recipe)))
@@ -92,20 +112,43 @@ struct RecipeDetailView: View {
                             }
                     }
 
-                    Button {
-                        showingForkForm = true
-                    } label: {
-                        Label("Fork This Recipe", systemImage: "arrow.triangle.branch")
-                            .frame(maxWidth: .infinity)
+                    HStack(spacing: 12) {
+                        Button {
+                            cooking = true
+                        } label: {
+                            Label("Start Cooking", systemImage: "frying.pan")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.red)
+                        Button {
+                            showingForkForm = true
+                        } label: {
+                            Label("Fork", systemImage: "arrow.triangle.branch")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.outline)
                     }
-                    .buttonStyle(.red)
 
                     RedDivider()
 
-                    VStack(alignment: .leading, spacing: 10) {
-                        SectionHeader("Ingredients")
-                        Text(recipe.ingredients.map { "•  " + $0 }.joined(separator: "\n\n"))
+                    VStack(alignment: .leading, spacing: 14) {
+                        HStack {
+                            SectionHeader("Ingredients")
+                            Spacer()
+                            Button(action: addToShoppingList) {
+                                Label(addedToList ? "Added" : "Add to List",
+                                      systemImage: addedToList ? "checkmark" : "cart.badge.plus")
+                                    .font(.subheadline.weight(.medium))
+                            }
+                            .buttonStyle(.borderless)
+                            .disabled(addedToList)
+                            .sensoryFeedback(.success, trigger: addedToList) { _, added in added }
+                        }
+                        ServingsStepper(baseServings: recipe.servings, selection: $servingsSelection)
+                        Text(recipe.ingredients.map { "•  " + IngredientScaler.scale($0, by: scaleFactor) }.joined(separator: "\n\n"))
                             .foregroundStyle(Theme.text)
+                            .contentTransition(.numericText())
+                            .animation(.default, value: servingsSelection)
                     }
 
                     RedDivider()
@@ -119,7 +162,15 @@ struct RecipeDetailView: View {
                                     .foregroundStyle(Theme.red)
                                     .frame(width: 30, height: 30)
                                     .background(Theme.red.opacity(0.1), in: Circle())
-                                Text(step).frame(maxWidth: .infinity, alignment: .leading)
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text(step)
+                                    if let minutes = StepDuration.minutes(in: step) {
+                                        Label(CookTime.label(minutes) + " timer in cook mode", systemImage: "timer")
+                                            .font(.caption)
+                                            .foregroundStyle(Theme.secondaryText)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
                             }
                             .padding(.vertical, 6)
                         }
@@ -132,8 +183,11 @@ struct RecipeDetailView: View {
                             SectionHeader("Variations")
                             ForEach(recipe.variations) { variation in
                                 NavigationLink(value: variation) {
-                                    VStack(alignment: .leading) {
+                                    VStack(alignment: .leading, spacing: 6) {
                                         RecipeRowView(recipe: variation)
+                                        if let note = variation.forkNote {
+                                            ForkNoteView(note: note)
+                                        }
                                         Text(RecipeDiff(original: RecipeContent(recipe: recipe), variation: RecipeContent(recipe: variation)).summary)
                                             .font(.caption)
                                             .foregroundStyle(Theme.secondaryText)
@@ -165,6 +219,10 @@ struct RecipeDetailView: View {
                     Image(systemName: recipe.isFavorite ? "heart.fill" : "heart")
                 }
                 .accessibilityLabel(recipe.isFavorite ? "Remove from Favorites" : "Add to Favorites")
+                ShareLink(item: RecipeShareText.make(recipe), subject: Text(recipe.title)) {
+                    Image(systemName: "square.and.arrow.up")
+                }
+                .accessibilityLabel("Share recipe")
                 // Editable recipes keep the button even with no versions, so its empty state can
                 // explain that saving an edit creates one. Sample recipes would only ever be empty.
                 if !recipe.versions.isEmpty || recipe.isUserCreated {
@@ -188,6 +246,24 @@ struct RecipeDetailView: View {
         }
         .sheet(isPresented: $showingForkForm) {
             RecipeFormView(parent: recipe)
+        }
+        .fullScreenCover(isPresented: $cooking) {
+            CookModeView(recipe: recipe, factor: scaleFactor)
+        }
+        .alert("Could not add to list", isPresented: Binding(get: { listError != nil }, set: { if !$0 { listError = nil } })) {
+            Button("OK") { listError = nil }
+        } message: { Text(listError ?? "") }
+        .onChange(of: recipe.servings) { _, newValue in servingsSelection = newValue ?? 1 }
+        .onChange(of: servingsSelection) { addedToList = false }
+    }
+
+    private func addToShoppingList() {
+        do {
+            try ShoppingList.add(recipe, factor: scaleFactor, context: modelContext)
+            addedToList = true
+        } catch {
+            modelContext.rollback()
+            listError = error.localizedDescription
         }
     }
 

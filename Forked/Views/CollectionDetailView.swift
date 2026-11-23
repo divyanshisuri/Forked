@@ -1,9 +1,15 @@
+// CollectionDetailView.swift
+// The recipes in one collection, sortable and shareable.
+
 import SwiftUI
 import SwiftData
 
 struct CollectionDetailView: View {
     @Bindable var collection: RecipeCollection
     @State private var showingAddRecipes = false
+    @AppStorage(RecipeSort.storageKey) private var sort: RecipeSort = .newest
+
+    private var sortedRecipes: [Recipe] { sort.apply(to: collection.recipes) }
 
     var body: some View {
         Group {
@@ -15,10 +21,11 @@ struct CollectionDetailView: View {
                 )
             } else {
                 List {
-                    ForEach(collection.recipes) { recipe in
+                    ForEach(sortedRecipes) { recipe in
                         NavigationLink(value: recipe) {
                             RecipeRowView(recipe: recipe)
                         }
+                        .recipeActions(recipe)
                         .listRowSeparator(.hidden)
                         .listRowBackground(Theme.background)
                     }
@@ -32,7 +39,15 @@ struct CollectionDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .redNavigationBar()
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                if !collection.recipes.isEmpty {
+                    RecipeSortMenu(selection: $sort)
+                    ShareLink(item: RecipeShareText.make(collection: collection.name, recipes: sortedRecipes),
+                              subject: Text(collection.name)) {
+                        Image(systemName: "square.and.arrow.up")
+                    }
+                    .accessibilityLabel("Share collection")
+                }
                 Button {
                     showingAddRecipes = true
                 } label: {
@@ -47,8 +62,7 @@ struct CollectionDetailView: View {
     }
 
     private func removeRecipes(at offsets: IndexSet) {
-        for index in offsets {
-            collection.recipes.remove(at: index)
-        }
+        let targets = offsets.map { sortedRecipes[$0] }
+        collection.recipes.removeAll { targets.contains($0) }
     }
 }

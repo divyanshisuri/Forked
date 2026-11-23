@@ -1,3 +1,6 @@
+// RecipeVersionView.swift
+// Read-only view of a saved previous version of a recipe.
+
 import SwiftUI
 
 struct RecipeVersionView: View {

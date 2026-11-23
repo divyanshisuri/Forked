@@ -1,3 +1,6 @@
+// RecipePhotoView.swift
+// Shows a recipe photo from saved data or a URL, with loading and placeholder states.
+
 import SwiftUI
 
 struct RecipePhotoView: View {
@@ -31,6 +34,7 @@ struct RecipePhotoView: View {
             }
             .frame(width: geometry.size.width, height: height)
             .clipped()
+            .contentShape(Rectangle())
         }
         .frame(height: height)
     }

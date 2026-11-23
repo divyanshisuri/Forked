@@ -1,3 +1,6 @@
+// StarRatingPicker.swift
+// Tappable 1 to 5 stars for rating a recipe.
+
 import SwiftUI
 
 struct StarRatingPicker: View {

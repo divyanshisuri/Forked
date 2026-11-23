@@ -1,3 +1,6 @@
+// RecipeFormView.swift
+// Create, fork or edit a recipe. One column on iPhone, two columns on wide iPad and Mac windows.
+
 import SwiftUI
 import SwiftData
 import PhotosUI
@@ -97,10 +100,16 @@ struct RecipeFormView: View {
     }
 
     @ViewBuilder private var parentSection: some View {
-        if let parent {
+        if let base = parent ?? editingRecipe?.parent {
             Section {
-                Label("Based on \(parent.title)", systemImage: "arrow.triangle.branch")
+                Label("Based on \(base.title)", systemImage: "arrow.triangle.branch")
                     .font(.subheadline).foregroundStyle(.secondary)
+                TextField("What changed? e.g. Made it vegan", text: $draft.forkNote, axis: .vertical)
+                    .lineLimit(1...4)
+            } header: {
+                Text("Fork")
+            } footer: {
+                Text("Shown on your variation so others know why it's different.")
             }
         }
     }
@@ -122,6 +131,21 @@ struct RecipeFormView: View {
             }
             if !CookTime.isValid(draft.cookTime) {
                 Text("Enter a whole number from 1 to 1440.")
+                    .font(.caption).foregroundStyle(Theme.red)
+            }
+            HStack {
+                HStack(spacing: 8) {
+                    Image(systemName: "person.2")
+                    Text("Servings").lineLimit(1).fixedSize()
+                }
+                .foregroundStyle(.secondary)
+                .accessibilityElement(children: .combine)
+                TextField("Optional", text: $draft.servings)
+                    .keyboardType(.numberPad)
+                    .multilineTextAlignment(.trailing)
+            }
+            if !Servings.isValid(draft.servings) {
+                Text("Enter a whole number from 1 to 99.")
                     .font(.caption).foregroundStyle(Theme.red)
             }
         }

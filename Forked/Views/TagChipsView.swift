@@ -1,3 +1,6 @@
+// TagChipsView.swift
+// A scrolling row of tag chips used to filter recipes.
+
 import SwiftUI
 
 struct TagChipsView: View {

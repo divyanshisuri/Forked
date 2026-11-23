@@ -1,3 +1,6 @@
+// PhotoPickerPreview.swift
+// Photo picker button that previews the chosen recipe photo.
+
 import SwiftUI
 import PhotosUI
 
