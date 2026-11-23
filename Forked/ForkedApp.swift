@@ -6,10 +6,14 @@ struct ForkedApp: App {
     let container: ModelContainer
 
     init() {
-        let schema = Schema([Recipe.self, Rating.self, RecipeCollection.self, RecipeVersion.self])
+        let schema = Schema(versionedSchema: ForkedSchemaV1.self)
         let configuration = ModelConfiguration(schema: schema)
         do {
-            container = try ModelContainer(for: schema, configurations: [configuration])
+            container = try ModelContainer(
+                for: schema,
+                migrationPlan: ForkedMigrationPlan.self,
+                configurations: [configuration]
+            )
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")
         }
