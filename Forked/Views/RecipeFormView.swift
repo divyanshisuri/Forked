@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import PhotosUI
+import UIKit
 
 struct RecipeFormView: View {
     @Environment(\.modelContext) private var modelContext
@@ -19,82 +20,170 @@ struct RecipeFormView: View {
         _draft = State(initialValue: RecipeDraft(recipe: editingRecipe ?? parent, isFork: editingRecipe == nil && parent != nil))
     }
 
+    private static let twoColumnMinWidth: CGFloat = 700
+
+    private var isPhone: Bool { UIDevice.current.userInterfaceIdiom == .phone }
+
     var body: some View {
-        NavigationStack {
+        if #available(iOS 18.0, *) {
+            if isPhone {
+                navigationContent
+            } else {
+                navigationContent
+                    .frame(idealWidth: 1000, idealHeight: 800)
+                    .presentationSizing(.fitted)
+            }
+        } else {
+            navigationContent
+        }
+    }
+
+    // Checked by device, not size class: large iPhones report a regular width in landscape.
+    @ViewBuilder private var layout: some View {
+        if isPhone {
+            singleColumnForm
+        } else {
+            GeometryReader { proxy in
+                if proxy.size.width >= Self.twoColumnMinWidth {
+                    twoColumnForm(width: proxy.size.width)
+                } else {
+                    singleColumnForm
+                }
+            }
+        }
+    }
+
+    private var singleColumnForm: some View {
+        Form {
+            photoSection(height: 190)
+            parentSection
+            detailsSection
+            ingredientsSection
+            methodSection
+            tagsSection
+        }
+        .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
+        .background(Theme.background)
+    }
+
+    private func twoColumnForm(width: CGFloat) -> some View {
+        HStack(spacing: 0) {
             Form {
-                Section {
-                    PhotoPickerPreview(photoItem: $photoItem, photoData: draft.photoData, imageURL: draft.imageURL, height: 190)
-                        .listRowInsets(EdgeInsets())
-                        .task(id: photoItem) {
-                            guard let item = photoItem,
-                                  let data = try? await item.loadTransferable(type: Data.self),
-                                  !Task.isCancelled else { return }
-                            draft.photoData = data
-                            draft.imageURL = nil
-                        }
-                }
-                if let parent {
-                    Section {
-                        Label("Based on \(parent.title)", systemImage: "arrow.triangle.branch")
-                            .font(.subheadline).foregroundStyle(.secondary)
-                    }
-                }
-                Section("Details") {
-                    TextField("Recipe title", text: $draft.title)
-                    HStack {
-                        Label("Cook time", systemImage: "clock").foregroundStyle(.secondary)
-                        TextField("Optional", text: $draft.cookTime)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
-                        Text("min").foregroundStyle(.secondary)
-                    }
-                    if !CookTime.isValid(draft.cookTime) {
-                        Text("Enter a whole number from 1 to 1440.")
-                            .font(.caption).foregroundStyle(Theme.red)
-                    }
-                }
-                Section("Ingredients") {
-                    ForEach(draft.ingredients) { row in
-                        HStack {
-                            TextField("Ingredient and quantity", text: rowBinding(row.id, in: \.ingredients), axis: .vertical)
-                            if draft.ingredients.count > 1 {
-                                Button(role: .destructive) {
-                                    guard draft.ingredients.count > 1 else { return }
-                                    draft.ingredients.removeAll { $0.id == row.id }
-                                } label: { Image(systemName: "minus.circle") }
-                                .buttonStyle(.borderless)
-                                .accessibilityLabel("Remove ingredient")
-                            }
-                        }
-                    }
-                    Button { draft.ingredients.append(.init()) } label: {
-                        Label("Add ingredient", systemImage: "plus")
-                    }
-                }
-                Section("Method") {
-                    ForEach(Array(draft.steps.enumerated()), id: \.element.id) { index, row in
-                        HStack(alignment: .firstTextBaseline, spacing: 12) {
-                            Text("\(index + 1)").font(.subheadline.monospacedDigit()).foregroundStyle(.secondary)
-                            TextField("Describe this step", text: rowBinding(row.id, in: \.steps), axis: .vertical)
-                            if draft.steps.count > 1 {
-                                Button(role: .destructive) {
-                                    guard draft.steps.count > 1 else { return }
-                                    draft.steps.removeAll { $0.id == row.id }
-                                } label: { Image(systemName: "minus.circle") }
-                                .buttonStyle(.borderless)
-                                .accessibilityLabel("Remove step")
-                            }
-                        }
-                    }
-                    Button { draft.steps.append(.init()) } label: {
-                        Label("Add step", systemImage: "plus")
-                    }
-                }
-                Section("Tags") { TagEditorView(tags: $draft.tags) }
+                photoSection(height: 260)
+                parentSection
+                detailsSection
+                tagsSection
             }
             .formStyle(.grouped)
             .scrollContentBackground(.hidden)
-            .background(Theme.background)
+            .frame(width: min(width * 0.4, 440))
+            Divider()
+            Form {
+                ingredientsSection
+                methodSection
+            }
+            .formStyle(.grouped)
+            .scrollContentBackground(.hidden)
+        }
+        .background(Theme.background)
+    }
+
+    private func photoSection(height: CGFloat) -> some View {
+        Section {
+            PhotoPickerPreview(photoItem: $photoItem, photoData: draft.photoData, imageURL: draft.imageURL, height: height)
+                .listRowInsets(EdgeInsets())
+        }
+    }
+
+    @ViewBuilder private var parentSection: some View {
+        if let parent {
+            Section {
+                Label("Based on \(parent.title)", systemImage: "arrow.triangle.branch")
+                    .font(.subheadline).foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private var detailsSection: some View {
+        Section("Details") {
+            TextField("Recipe title", text: $draft.title)
+            HStack {
+                HStack(spacing: 8) {
+                    Image(systemName: "clock")
+                    Text("Cook time").lineLimit(1).fixedSize()
+                }
+                .foregroundStyle(.secondary)
+                .accessibilityElement(children: .combine)
+                TextField("Optional", text: $draft.cookTime)
+                    .keyboardType(.numberPad)
+                    .multilineTextAlignment(.trailing)
+                Text("min").foregroundStyle(.secondary)
+            }
+            if !CookTime.isValid(draft.cookTime) {
+                Text("Enter a whole number from 1 to 1440.")
+                    .font(.caption).foregroundStyle(Theme.red)
+            }
+        }
+    }
+
+    private var ingredientsSection: some View {
+        Section("Ingredients") {
+            ForEach(draft.ingredients) { row in
+                HStack {
+                    TextField("Ingredient and quantity", text: rowBinding(row.id, in: \.ingredients), axis: .vertical)
+                    if draft.ingredients.count > 1 {
+                        Button(role: .destructive) {
+                            guard draft.ingredients.count > 1 else { return }
+                            draft.ingredients.removeAll { $0.id == row.id }
+                        } label: { Image(systemName: "minus.circle") }
+                        .buttonStyle(.borderless)
+                        .accessibilityLabel("Remove ingredient")
+                    }
+                }
+            }
+            Button { draft.ingredients.append(.init()) } label: {
+                Label("Add ingredient", systemImage: "plus")
+            }
+        }
+    }
+
+    private var methodSection: some View {
+        Section("Method") {
+            ForEach(Array(draft.steps.enumerated()), id: \.element.id) { index, row in
+                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                    Text("\(index + 1)").font(.subheadline.monospacedDigit()).foregroundStyle(.secondary)
+                    TextField("Describe this step", text: rowBinding(row.id, in: \.steps), axis: .vertical)
+                    if draft.steps.count > 1 {
+                        Button(role: .destructive) {
+                            guard draft.steps.count > 1 else { return }
+                            draft.steps.removeAll { $0.id == row.id }
+                        } label: { Image(systemName: "minus.circle") }
+                        .buttonStyle(.borderless)
+                        .accessibilityLabel("Remove step")
+                    }
+                }
+            }
+            Button { draft.steps.append(.init()) } label: {
+                Label("Add step", systemImage: "plus")
+            }
+        }
+    }
+
+    private var tagsSection: some View {
+        Section("Tags") { TagEditorView(tags: $draft.tags) }
+    }
+
+    private var navigationContent: some View {
+        NavigationStack {
+            layout
+            .task(id: photoItem) {
+                guard let item = photoItem,
+                      let data = try? await item.loadTransferable(type: Data.self),
+                      !Task.isCancelled else { return }
+                draft.photoData = data
+                draft.imageURL = nil
+            }
             .navigationTitle(editingRecipe != nil ? "Edit Recipe" : (parent == nil ? "New Recipe" : "Fork Recipe"))
             .navigationBarTitleDisplayMode(.inline)
             .tint(Theme.red)
