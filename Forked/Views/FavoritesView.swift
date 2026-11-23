@@ -1,14 +1,19 @@
+// FavoritesView.swift
+// Recipes marked as favorites, sortable.
+
 import SwiftUI
 import SwiftData
 
 struct FavoritesView: View {
     @Query(filter: #Predicate<Recipe> { $0.isFavorite }, sort: \Recipe.createdAt, order: .reverse)
     private var recipes: [Recipe]
+    @AppStorage(RecipeSort.storageKey) private var sort: RecipeSort = .newest
 
     var body: some View {
-        List(recipes) { recipe in
+        List(sort.apply(to: recipes)) { recipe in
             NavigationLink(value: recipe) { RecipeRowView(recipe: recipe) }
                 .listRowSeparator(.hidden)
+                .recipeActions(recipe)
         }
         .overlay {
             if recipes.isEmpty {
@@ -17,5 +22,8 @@ struct FavoritesView: View {
         }
         .navigationTitle("Favorites")
         .redNavigationBar()
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) { RecipeSortMenu(selection: $sort) }
+        }
     }
 }

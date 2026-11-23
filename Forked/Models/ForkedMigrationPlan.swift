@@ -2,10 +2,13 @@
 import SwiftData
 
 nonisolated enum ForkedMigrationPlan: SchemaMigrationPlan {
-    static var schemas: [any VersionedSchema.Type] { [ForkedSchemaV1.self, ForkedSchemaV2.self] }
+    static var schemas: [any VersionedSchema.Type] { [ForkedSchemaV1.self, ForkedSchemaV2.self, ForkedSchemaV3.self] }
 
-    /// V1 to V2 only adds the User table, so SwiftData can upgrade it automatically.
+    /// Each step only adds tables or optional columns, so SwiftData can upgrade automatically.
     static var stages: [MigrationStage] {
-        [.lightweight(fromVersion: ForkedSchemaV1.self, toVersion: ForkedSchemaV2.self)]
+        [
+            .lightweight(fromVersion: ForkedSchemaV1.self, toVersion: ForkedSchemaV2.self),
+            .lightweight(fromVersion: ForkedSchemaV2.self, toVersion: ForkedSchemaV3.self)
+        ]
     }
 }

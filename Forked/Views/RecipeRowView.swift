@@ -1,3 +1,6 @@
+// RecipeRowView.swift
+// The recipe card used in grids and lists: photo, title, author, time, rating, servings and forks.
+
 import SwiftUI
 
 struct RecipeRowView: View {
@@ -32,14 +35,22 @@ struct RecipeRowView: View {
                     if let average = recipe.averageRating {
                         Label(String(format: "%.1f", average), systemImage: "star.fill")
                     }
+                    if let servings = recipe.servings {
+                        Label("\(servings)", systemImage: "person.2").accessibilityLabel(Servings.label(servings))
+                    }
                     Spacer(minLength: 0)
-                    if recipe.parent != nil {
+                    if !recipe.variations.isEmpty {
+                        Label("\(recipe.variations.count)", systemImage: "arrow.triangle.branch")
+                            .accessibilityLabel("\(recipe.variations.count) fork\(recipe.variations.count == 1 ? "" : "s")")
+                    } else if recipe.parent != nil {
                         Image(systemName: "arrow.triangle.branch").accessibilityLabel("Variation")
                     }
                 }
                 .font(.caption)
                 .foregroundStyle(Theme.secondaryText)
-                if !recipe.tags.isEmpty {
+                if let note = recipe.forkNote {
+                    ForkNoteView(note: note).lineLimit(1)
+                } else if !recipe.tags.isEmpty {
                     Text(recipe.tags.prefix(3).joined(separator: " · "))
                         .font(.caption)
                         .foregroundStyle(Theme.secondaryText)

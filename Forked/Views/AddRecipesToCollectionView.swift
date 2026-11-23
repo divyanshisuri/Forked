@@ -1,3 +1,6 @@
+// AddRecipesToCollectionView.swift
+// Sheet for adding or removing recipes in a collection.
+
 import SwiftUI
 import SwiftData
 

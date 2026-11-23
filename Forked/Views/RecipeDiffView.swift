@@ -1,3 +1,6 @@
+// RecipeDiffView.swift
+// Lists what a variation changed compared to its original.
+
 import SwiftUI
 
 struct RecipeDiffView: View {

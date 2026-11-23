@@ -1,3 +1,6 @@
+// Rating.swift
+// A 1 to 5 star rating that a user gives a recipe.
+
 import Foundation
 import SwiftData
 

@@ -1,3 +1,6 @@
+// RecipePhotoPlaceholder.swift
+// Shown while a photo loads or when a recipe has none.
+
 import SwiftUI
 
 struct RecipePhotoPlaceholder: View {

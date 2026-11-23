@@ -1,3 +1,6 @@
+// HomeHeaderBanner.swift
+// Welcome header at the top of the recipe feed.
+
 import SwiftUI
 
 struct HomeHeaderBanner: View {

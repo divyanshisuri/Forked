@@ -1,3 +1,6 @@
+// RecipeContent.swift
+// The editable content of a recipe as a value type, used for versions and diffs.
+
 import Foundation
 nonisolated struct RecipeContent: Codable, Equatable, Sendable {
     var title: String

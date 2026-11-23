@@ -9,6 +9,8 @@ struct RootView: View {
     @Query private var users: [User]
     @State private var selectedTab = 0
     @State private var showingNewPost = false
+    @State private var discover = DiscoverModel(service: AppEnvironment.makeFeedService())
+    @AppStorage(OnboardingView.storageKey, store: AppEnvironment.defaults) private var hasSeenOnboarding = false
 
     private var currentUser: User? {
         guard !currentAccountID.isEmpty else { return nil }
@@ -29,7 +31,9 @@ struct RootView: View {
     }
 
     var body: some View {
-        if let currentUser {
+        if !hasSeenOnboarding {
+            OnboardingView { withAnimation { hasSeenOnboarding = true } }
+        } else if let currentUser {
             signedInContent(for: currentUser)
         } else {
             AuthView(onAuthenticated: startSession)
@@ -61,12 +65,24 @@ struct RootView: View {
                                     .fontWeight(selectedTab == 0 ? .semibold : .regular)
                             }
                             .listRowBackground(selectedTab == 0 ? Theme.surface : Theme.background)
+                            Button { selectedTab = 4 } label: {
+                                Label("Discover", systemImage: "globe")
+                                    .foregroundStyle(Theme.text)
+                                    .fontWeight(selectedTab == 4 ? .semibold : .regular)
+                            }
+                            .listRowBackground(selectedTab == 4 ? Theme.surface : Theme.background)
                             Button { selectedTab = 2 } label: {
                                 Label("Collections", systemImage: "square.stack")
                                     .foregroundStyle(Theme.text)
                                     .fontWeight(selectedTab == 2 ? .semibold : .regular)
                             }
                             .listRowBackground(selectedTab == 2 ? Theme.surface : Theme.background)
+                            Button { selectedTab = 5 } label: {
+                                Label("Shopping List", systemImage: "cart")
+                                    .foregroundStyle(Theme.text)
+                                    .fontWeight(selectedTab == 5 ? .semibold : .regular)
+                            }
+                            .listRowBackground(selectedTab == 5 ? Theme.surface : Theme.background)
                             Button { selectedTab = 3 } label: {
                                 Label("Profile", systemImage: "person.crop.circle")
                                     .foregroundStyle(Theme.text)
@@ -90,6 +106,8 @@ struct RootView: View {
                     .navigationSplitViewColumnWidth(min: 200, ideal: 230, max: 280)
                 } detail: {
                     if selectedTab == 2 { CollectionsView() }
+                    else if selectedTab == 4 { DiscoverView(model: discover) }
+                    else if selectedTab == 5 { NavigationStack { ShoppingListView() } }
                     else if selectedTab == 3 { ProfileView(user: user, onLogOut: endSession) }
                     else { RecipeListView() }
                 }
@@ -99,6 +117,8 @@ struct RootView: View {
                         .tabItem { Label("Recipes", systemImage: "fork.knife") }.tag(0)
                     Color.clear
                         .tabItem { Label("New Recipe", systemImage: "plus.circle") }.tag(1)
+                    DiscoverView(model: discover)
+                        .tabItem { Label("Discover", systemImage: "globe") }.tag(4)
                     CollectionsView()
                         .tabItem { Label("Collections", systemImage: "square.stack") }.tag(2)
                     ProfileView(user: user, onLogOut: endSession)
@@ -107,6 +127,7 @@ struct RootView: View {
             }
         }
         .tint(Theme.red)
+        .environment(\.isChef, user.role == .chef)
         .sheet(isPresented: $showingNewPost) { RecipeFormView() }
     }
 }

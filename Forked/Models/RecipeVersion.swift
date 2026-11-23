@@ -1,3 +1,6 @@
+// RecipeVersion.swift
+// A snapshot of a recipe saved before each edit, for version history.
+
 import Foundation
 import SwiftData
 @Model

@@ -1,3 +1,6 @@
+// StarRatingView.swift
+// Read-only star display for a recipe's average rating.
+
 import SwiftUI
 
 struct StarRatingView: View {

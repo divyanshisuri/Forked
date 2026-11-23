@@ -35,6 +35,16 @@
 			path = Forked;
 			sourceTree = "<group>";
 		};
+		AA10000000000000000000A1 /* ForkedTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ForkedTests;
+			sourceTree = "<group>";
+		};
+		AA10000000000000000000A2 /* ForkedUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ForkedUITests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +76,8 @@
 			isa = PBXGroup;
 			children = (
 				FBE0B4FD308EF6990057FE29 /* Forked */,
+				AA10000000000000000000A1 /* ForkedTests */,
+				AA10000000000000000000A2 /* ForkedUITests */,
 				FBE0B4FC308EF6990057FE29 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -118,6 +130,9 @@
 			dependencies = (
 				FBE0B50A308EF69B0057FE29 /* PBXTargetDependency */,
 			);
+			fileSystemSynchronizedGroups = (
+				AA10000000000000000000A1 /* ForkedTests */,
+			);
 			name = ForkedTests;
 			packageProductDependencies = (
 			);
@@ -137,6 +152,9 @@
 			);
 			dependencies = (
 				FBE0B514308EF69B0057FE29 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				AA10000000000000000000A2 /* ForkedUITests */,
 			);
 			name = ForkedUITests;
 			packageProductDependencies = (
@@ -449,7 +467,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.divyasuri.ForkedTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -470,7 +488,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.divyasuri.ForkedTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";

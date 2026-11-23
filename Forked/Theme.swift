@@ -1,3 +1,6 @@
+// Theme.swift
+// The app's colors, card styling and shared button styles, with light and dark variants.
+
 import SwiftUI
 import UIKit
 
@@ -37,4 +40,20 @@ struct RedButtonStyle: ButtonStyle {
 }
 extension ButtonStyle where Self == RedButtonStyle {
     static var red: RedButtonStyle { RedButtonStyle() }
+}
+struct OutlineButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(Theme.text)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 14)
+            .background(RoundedRectangle(cornerRadius: 12).strokeBorder(Theme.text.opacity(0.25), lineWidth: 1))
+            .contentShape(RoundedRectangle(cornerRadius: 12))
+            .opacity(isEnabled ? (configuration.isPressed ? 0.6 : 1) : 0.4)
+    }
+}
+extension ButtonStyle where Self == OutlineButtonStyle {
+    static var outline: OutlineButtonStyle { OutlineButtonStyle() }
 }

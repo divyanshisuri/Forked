@@ -1,3 +1,6 @@
+// SectionHeader.swift
+// Consistent heading style for sections on recipe pages.
+
 import SwiftUI
 
 struct SectionHeader: View {
