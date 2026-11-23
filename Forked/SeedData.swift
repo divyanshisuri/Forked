@@ -1,7 +1,9 @@
+// Sample data for first launch: 8 recipes with ratings, and 8 accounts (4 chefs, 4 consumers).
 import Foundation
 import SwiftData
 
 enum SeedData {
+    /// Inserts the sample recipes into an empty store, or backfills ownership on older stores.
     static func seedIfNeeded(context: ModelContext) {
         let existing = try? context.fetchCount(FetchDescriptor<Recipe>())
         guard existing == 0 else {
@@ -159,4 +161,41 @@ enum SeedData {
             }
         }
     }
+
+    // Procedural: a fixed sequence of steps (check, decode, insert, save) with no shared state.
+    /// Inserts the 8 sample accounts when the store has no users yet, including after upgrading from V1.
+    static func seedUsersIfNeeded(context: ModelContext) {
+        let existing = try? context.fetchCount(FetchDescriptor<User>())
+        guard existing == 0 else { return }
+
+        for sample in sampleUsers {
+            guard let salt = Data(base64Encoded: sample.salt),
+                  let hash = Data(base64Encoded: sample.hash) else { continue }
+            context.insert(User(
+                username: sample.username,
+                role: sample.role,
+                passwordHash: hash,
+                passwordSalt: salt,
+                passwordIterations: sampleIterations
+            ))
+        }
+        try? context.save()
+    }
+
+    // The hashes are precomputed because running PBKDF2 eight times at full strength would make
+    // first launch noticeably slow. Every account uses the password "forked2026", hashed with
+    // PBKDF2-HMAC-SHA256, 600,000 iterations and a 32-byte key. Regenerate a salt and hash with:
+    // python3 -c "import hashlib,base64,os;s=os.urandom(16);print(base64.b64encode(s).decode(),base64.b64encode(hashlib.pbkdf2_hmac('sha256',b'forked2026',s,600000,32)).decode())"
+    private static let sampleIterations = 600_000
+
+    private static let sampleUsers: [(username: String, role: UserRole, salt: String, hash: String)] = [
+        ("chef_maria", .chef, "uZ5T5KHbymWdooq+c/W8FQ==", "3QRO8xOZrztS196m/Cq5pehNkBF2YezjCsu2z+Q4aa0="),
+        ("chef_kenji", .chef, "cLFzdDMQ+k2jQmWszRYKOw==", "aqobX1AsN3UDgrF5RkhyD1qY5mUJfmqkhthugVfBzak="),
+        ("chef_amara", .chef, "lVLbZmZ/JnJNzuYXKuZU0g==", "BRwa0gF/zNnkd9+VpD3/eueyUZKSjEAF5+gHmk19dMU="),
+        ("chef_luca", .chef, "9ZeWZn3RNag3/PgXblUtCg==", "6+E3PvpkuEh3QP0khA7IH0YQphcLOyBiTkvYk9Jg8Yg="),
+        ("sam_eats", .consumer, "NFWPZEUcNdSi8893ovcMFQ==", "+8k4nPTbB0kJCgStu5oSoDwk3ohCUggAjMTjes2AkQM="),
+        ("priya_k", .consumer, "aXGybXtZOY9rEsAb1NE5ag==", "F7tQNrqF7CQdvoau4bZs/va+m376bRrjZYGKXMav/lM="),
+        ("jordan_b", .consumer, "K3DgzLTuqRt9UgFhpG1h6w==", "HpPezF/xfyjf1BSxukL7luL3c06s5PYz/RX1gxZj0f0="),
+        ("mei_lin", .consumer, "ZLmX1CalckSHphTB8z4c0A==", "7ToedFRtdOspS+rgxwzgr3G1HQ25ZBsSHHrAuJBa+RQ=")
+    ]
 }

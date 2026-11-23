@@ -28,6 +28,22 @@ Chefs post recipes. Anyone can fork a recipe to make their own variation (vegan,
 
 Sample recipes load on first launch.
 
+## Sample accounts
+Eight accounts are created on first launch. They all use the password **`forked2026`**.
+
+| Username | Role |
+|----------|------|
+| `chef_maria` | Chef |
+| `chef_kenji` | Chef |
+| `chef_amara` | Chef |
+| `chef_luca` | Chef |
+| `sam_eats` | Consumer |
+| `priya_k` | Consumer |
+| `jordan_b` | Consumer |
+| `mei_lin` | Consumer |
+
+You can also sign up for a new account on the log-in screen. Accounts are stored only on the device.
+
 ## Project Structure
 ```
 Forked/
