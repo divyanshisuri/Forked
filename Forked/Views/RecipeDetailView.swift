@@ -1,3 +1,5 @@
+// A recipe's full page: photo, rating, fork and edit actions, ingredients, steps,
+// changes from the original and its variations.
 import SwiftUI
 import SwiftData
 
@@ -163,12 +165,16 @@ struct RecipeDetailView: View {
                     Image(systemName: recipe.isFavorite ? "heart.fill" : "heart")
                 }
                 .accessibilityLabel(recipe.isFavorite ? "Remove from Favorites" : "Add to Favorites")
-                NavigationLink {
-                    RecipeHistoryView(recipe: recipe)
-                } label: {
-                    Image(systemName: "clock.arrow.circlepath")
+                // Editable recipes keep the button even with no versions, so its empty state can
+                // explain that saving an edit creates one. Sample recipes would only ever be empty.
+                if !recipe.versions.isEmpty || recipe.isUserCreated {
+                    NavigationLink {
+                        RecipeHistoryView(recipe: recipe)
+                    } label: {
+                        Image(systemName: "clock.arrow.circlepath")
+                    }
+                    .accessibilityLabel("Version history")
                 }
-                .accessibilityLabel("Version history")
                 if recipe.isUserCreated {
                     Button("Edit") { showingEditForm = true }
                 }
