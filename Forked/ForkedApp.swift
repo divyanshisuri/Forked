@@ -1,3 +1,4 @@
+// App entry point: opens the SwiftData store, upgrading older layouts, and seeds the sample data.
 import SwiftUI
 import SwiftData
 
@@ -6,7 +7,7 @@ struct ForkedApp: App {
     let container: ModelContainer
 
     init() {
-        let schema = Schema(versionedSchema: ForkedSchemaV1.self)
+        let schema = Schema(versionedSchema: ForkedSchemaV2.self)
         let configuration = ModelConfiguration(schema: schema)
         do {
             container = try ModelContainer(
@@ -18,6 +19,7 @@ struct ForkedApp: App {
             fatalError("Failed to create ModelContainer: \(error)")
         }
         SeedData.seedIfNeeded(context: container.mainContext)
+        SeedData.seedUsersIfNeeded(context: container.mainContext)
     }
 
     var body: some Scene {
