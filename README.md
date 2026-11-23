@@ -55,7 +55,6 @@ Forked.xcodeproj    Xcode project
 - "Changes from Original" compares a fork with the original as it is now, so editing the original changes what its forks show.
 - A rating can't be removed once it's set, and the average includes your own rating.
 - Tags are case-sensitive, so "Vegan" and "vegan" are separate filters.
-- Version History appears on every recipe, including sample recipes, which can't be edited, so theirs is always empty.
 - Sample recipe photos load from the internet and show a placeholder when offline.
 - There are no automated tests yet.
 
