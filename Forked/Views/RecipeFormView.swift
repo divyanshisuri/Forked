@@ -109,7 +109,12 @@ struct RecipeFormView: View {
         Section("Details") {
             TextField("Recipe title", text: $draft.title)
             HStack {
-                Label("Cook time", systemImage: "clock").foregroundStyle(.secondary)
+                HStack(spacing: 8) {
+                    Image(systemName: "clock")
+                    Text("Cook time").lineLimit(1).fixedSize()
+                }
+                .foregroundStyle(.secondary)
+                .accessibilityElement(children: .combine)
                 TextField("Optional", text: $draft.cookTime)
                     .keyboardType(.numberPad)
                     .multilineTextAlignment(.trailing)
